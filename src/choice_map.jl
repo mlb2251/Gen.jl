@@ -101,7 +101,7 @@ end
     get_submap(submap, rest)
 end
 
-function Gen._show_pretty(io::IO, choices::ChoiceMap, pre, vert_bars::Tuple)
+function _show_pretty(io::IO, choices::ChoiceMap, pre, vert_bars::Tuple)
     VERT = '\u2502'
     PLUS = '\u251C'
     HORZ = '\u2500'
