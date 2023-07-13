@@ -172,10 +172,10 @@ function get_val_score(choices, key)
     "unable to print score for type: $(typeof(choices))"
 end
 
-function get_val_score(choices::Gen.DynamicDSLChoiceMap, key)
+function get_val_score(choices::DynamicDSLChoiceMap, key)
     choices.trie[key].score
 end
-function get_val_score(choices::Gen.StaticIRTraceAssmt, key)
+function get_val_score(choices::StaticIRTraceAssmt, key)
     getfield(choices.trace, Symbol("$(Gen.choice_score_prefix)_$key"))
 end
 
@@ -183,15 +183,15 @@ function get_submap_score(choices, key)
     "unable to print score for type: $(typeof(choices))"
 end
 
-function get_submap_score(choices::Gen.DynamicDSLChoiceMap, key)
+function get_submap_score(choices::DynamicDSLChoiceMap, key)
     choices.trie[key].score
 end
-function get_submap_score(choices::Gen.StaticIRTraceAssmt, key)
+function get_submap_score(choices::StaticIRTraceAssmt, key)
     subtrace = getfield(choices.trace, Symbol("$(Gen.subtrace_prefix)_$key"))
     get_score(subtrace)
 end
 
-function get_submap_score(choices::Gen.VectorTraceChoiceMap, key::Int)
+function get_submap_score(choices::VectorTraceChoiceMap, key::Int)
     get_score(choices.trace.subtraces[key])
 end
 
