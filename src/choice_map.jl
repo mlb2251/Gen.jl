@@ -101,7 +101,7 @@ end
     get_submap(submap, rest)
 end
 
-function _show_pretty(io::IO, choices::ChoiceMap, pre, vert_bars::Tuple)
+function Gen._show_pretty(io::IO, choices::ChoiceMap, pre, vert_bars::Tuple)
     VERT = '\u2502'
     PLUS = '\u251C'
     HORZ = '\u2500'
@@ -127,19 +127,80 @@ function _show_pretty(io::IO, choices::ChoiceMap, pre, vert_bars::Tuple)
         # For strings, `print` is what we want; `Base.show` includes quote marks.
         # https://docs.julialang.org/en/v1/base/io-network/#Base.print
         print(io, indent_vert_str)
-        print(io, (cur == n ? indent_last_str : indent_str) * "$(repr(key)) : $value\n")
+
+        ##################
+        # MODIFIED START #
+        ##################
+
+        val_str = string(value)
+        if length(val_str) > 50
+            val_str = val_str[1:50] * "..."
+        end
+
+        score = get_val_score(choices, key)
+
+        print(io, (cur == n ? indent_last_str : indent_str) * "$(repr(key)) : $val_str [score=$score]\n")
+
+        ################
+        # MODIFIED END #
+        ################
+
         cur += 1
     end
     for (key, submap) in key_and_submaps
         print(io, indent_vert_str)
-        print(io, (cur == n ? indent_last_str : indent_str) * "$(repr(key))\n")
-        _show_pretty(io, submap, pre + 4, cur == n ? (vert_bars...,) : (vert_bars..., pre+1))
+
+        ##################
+        # MODIFIED START #
+        ##################
+
+        score = get_submap_score(choices, key)
+        print(io, (cur == n ? indent_last_str : indent_str) * "$(repr(key))  [total score=$score] \n")
+
+        ################
+        # MODIFIED END #
+        ################
+
+
+        Gen._show_pretty(io, submap, pre + 4, cur == n ? (vert_bars...,) : (vert_bars..., pre+1))
         cur += 1
+
     end
 end
 
-function Base.show(io::IO, ::MIME"text/plain", choices::ChoiceMap)
+function get_val_score(choices, key)
+    "unable to print score for type: $(typeof(choices))"
+end
+
+function get_val_score(choices::Gen.DynamicDSLChoiceMap, key)
+    choices.trie[key].score
+end
+function get_val_score(choices::Gen.StaticIRTraceAssmt, key)
+    getfield(choices.trace, Symbol("$(Gen.choice_score_prefix)_$key"))
+end
+
+function get_submap_score(choices, key)
+    "unable to print score for type: $(typeof(choices))"
+end
+
+function get_submap_score(choices::Gen.DynamicDSLChoiceMap, key)
+    choices.trie[key].score
+end
+function get_submap_score(choices::Gen.StaticIRTraceAssmt, key)
+    subtrace = getfield(choices.trace, Symbol("$(Gen.subtrace_prefix)_$key"))
+    get_score(subtrace)
+end
+
+function get_submap_score(choices::Gen.VectorTraceChoiceMap, key::Int)
+    get_score(choices.trace.subtraces[key])
+end
+
+function Base.show(io::IO, choices::ChoiceMap)
     _show_pretty(io, choices, 0, ())
+end
+
+function Base.show(io::IO, tr::Trace)
+    show(io, get_choices(tr))
 end
 
 # assignments that have static address schemas should also support faster
