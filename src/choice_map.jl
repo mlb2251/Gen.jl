@@ -162,7 +162,7 @@ function _show_pretty(io::IO, choices::ChoiceMap, pre, vert_bars::Tuple)
         ################
 
 
-        Gen._show_pretty(io, submap, pre + 4, cur == n ? (vert_bars...,) : (vert_bars..., pre+1))
+        _show_pretty(io, submap, pre + 4, cur == n ? (vert_bars...,) : (vert_bars..., pre+1))
         cur += 1
 
     end
