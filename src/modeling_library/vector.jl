@@ -76,6 +76,10 @@ struct VectorTraceChoiceMap{GenFnType, T, U} <: ChoiceMap
     trace::VectorTrace{GenFnType, T, U}
 end
 
+function get_submap_score(choices::VectorTraceChoiceMap, key::Int)
+    get_score(choices.trace.subtraces[key])
+end
+
 @inline Base.isempty(assignment::VectorTraceChoiceMap) = assignment.trace.num_nonempty == 0
 @inline get_address_schema(::Type{VectorTraceChoiceMap}) = VectorAddressSchema()
 

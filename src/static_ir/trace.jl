@@ -8,6 +8,14 @@ end
 
 function get_schema end
 
+function get_val_score(choices::StaticIRTraceAssmt, key)
+    getfield(choices.trace, Symbol("$(Gen.choice_score_prefix)_$key"))
+end
+function get_submap_score(choices::StaticIRTraceAssmt, key)
+    subtrace = getfield(choices.trace, Symbol("$(Gen.subtrace_prefix)_$key"))
+    get_score(subtrace)
+end
+
 @inline get_address_schema(::Type{StaticIRTraceAssmt{T}}) where {T} = get_schema(T)
 
 @inline Base.isempty(choices::StaticIRTraceAssmt) = isempty(choices.trace)

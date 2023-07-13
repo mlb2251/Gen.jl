@@ -171,37 +171,17 @@ end
 function get_val_score(choices, key)
     "unable to print score for type: $(typeof(choices))"
 end
-
-function get_val_score(choices::DynamicDSLChoiceMap, key)
-    choices.trie[key].score
-end
-function get_val_score(choices::StaticIRTraceAssmt, key)
-    getfield(choices.trace, Symbol("$(Gen.choice_score_prefix)_$key"))
-end
-
 function get_submap_score(choices, key)
     "unable to print score for type: $(typeof(choices))"
 end
 
-function get_submap_score(choices::DynamicDSLChoiceMap, key)
-    choices.trie[key].score
-end
-function get_submap_score(choices::StaticIRTraceAssmt, key)
-    subtrace = getfield(choices.trace, Symbol("$(Gen.subtrace_prefix)_$key"))
-    get_score(subtrace)
-end
 
-function get_submap_score(choices::VectorTraceChoiceMap, key::Int)
-    get_score(choices.trace.subtraces[key])
-end
 
 function Base.show(io::IO, choices::ChoiceMap)
     _show_pretty(io, choices, 0, ())
 end
 
-function Base.show(io::IO, tr::Trace)
-    show(io, get_choices(tr))
-end
+
 
 # assignments that have static address schemas should also support faster
 # accessors, which make the address explicit in the type (Val(:foo) instaed of

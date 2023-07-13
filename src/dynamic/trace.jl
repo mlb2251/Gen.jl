@@ -118,6 +118,13 @@ struct DynamicDSLChoiceMap <: ChoiceMap
     trie::Trie{Any,ChoiceOrCallRecord}
 end
 
+function get_val_score(choices::DynamicDSLChoiceMap, key)
+    choices.trie[key].score
+end
+function get_submap_score(choices::DynamicDSLChoiceMap, key)
+    choices.trie[key].score
+end
+
 get_address_schema(::Type{DynamicDSLChoiceMap}) = DynamicAddressSchema()
 Base.isempty(::DynamicDSLChoiceMap) = false # TODO not necessarily true
 has_value(choices::DynamicDSLChoiceMap, addr::Pair) = _has_value(choices, addr)

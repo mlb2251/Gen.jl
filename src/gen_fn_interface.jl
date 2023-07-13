@@ -68,6 +68,11 @@ Return the generative function that produced the given trace.
 """
 function get_gen_fn end
 
+
+function Base.show(io::IO, tr::Trace)
+    show(io, get_choices(tr))
+end
+
 """
     value = getindex(trace::Trace, addr)
 
