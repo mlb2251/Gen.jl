@@ -137,7 +137,11 @@ function _show_pretty(io::IO, choices::ChoiceMap, pre, vert_bars::Tuple)
             val_str = val_str[1:50] * "..."
         end
 
-        score = get_val_score(choices, key)
+        score = try
+            get_val_score(choices, key)
+        catch e
+            "error during get_val_score(): $e"
+        end
 
         print(io, (cur == n ? indent_last_str : indent_str) * "$(repr(key)) : $val_str [score=$score]\n")
 
@@ -154,7 +158,12 @@ function _show_pretty(io::IO, choices::ChoiceMap, pre, vert_bars::Tuple)
         # MODIFIED START #
         ##################
 
-        score = get_submap_score(choices, key)
+        score = try
+            get_submap_score(choices, key)
+        catch e
+            "error during get_submap_score(): $e"
+        end
+
         print(io, (cur == n ? indent_last_str : indent_str) * "$(repr(key))  [total score=$score] \n")
 
         ################
