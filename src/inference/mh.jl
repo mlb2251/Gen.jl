@@ -61,6 +61,14 @@ function metropolis_hastings(
     end
 end
 
+
+Base.@kwdef mutable struct MHStats
+    accepted::Int = 0
+    total::Int = 0
+    nan::Int = 0
+    inf::Int = 0
+end
+
 """
     (new_trace, accepted) = metropolis_hastings(
         trace, proposal::GenerativeFunction, proposal_args::Tuple,
@@ -82,6 +90,53 @@ When continuous random choices are used, the `weight` returned by the involution
 NOTE: The Jacobian matrix of the bijection on the continuous random choices must be full-rank (i.e. nonzero determinant).
 The `check` keyword argument to the involution can be used to enable or disable any dynamic correctness checks that the involution performs; for successful executions, `check` does not alter the return value.
 """
+function mh_tracked(
+        trace, proposal::GenerativeFunction,
+        proposal_args::Tuple, involution::Union{TraceTransformDSLProgram,Function};
+        check=false, observations=EmptyChoiceMap(), stats=nothing, pass_mode=false)
+
+    mode = Ref(:null)
+    if pass_mode
+        proposal_args = (mode, proposal_args...,)
+    end
+    
+    trace_translator = SymmetricTraceTranslator(proposal, proposal_args, involution)
+    (new_trace, log_weight) = trace_translator(trace; check=check, observations=observations)
+
+    do_accept = log(rand()) < log_weight
+
+    if stats !== nothing
+        key = if mode[] !== :null
+            Symbol(involution, "@", mode[])
+        else
+            Symbol(involution)
+        end
+        
+        substats = get!(MHStats, stats, key)
+
+        substats.total += 1
+
+        if do_accept
+            substats.accepted += 1
+        end
+        if isinf(log_weight)
+            substats.inf += 1
+        end
+        if isnan(log_weight)
+            substats.nan += 1
+        end
+    end
+
+    if do_accept
+        # accept
+        (new_trace, true)
+    else
+        # reject
+        (trace, false)
+    end
+end
+
+
 function metropolis_hastings(
         trace, proposal::GenerativeFunction,
         proposal_args::Tuple, involution::Union{TraceTransformDSLProgram,Function};
